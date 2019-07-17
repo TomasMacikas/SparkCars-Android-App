@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SparkCars</string>
+    <string name="title_activity_filter">FilterActivity</string>
+    <string name="filter">Filter</string>
+</resources>
