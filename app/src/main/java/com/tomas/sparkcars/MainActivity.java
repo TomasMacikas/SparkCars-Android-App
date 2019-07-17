@@ -1,5 +1,6 @@
 package com.tomas.sparkcars;
 
+import android.Manifest;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Location;
@@ -28,8 +29,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -64,39 +67,46 @@ public class MainActivity extends AppCompatActivity implements MainView {
         locationText = findViewById(R.id.tv_current_location);
 
         //Permissions
-        //final RxPermissions rxPermissions = new RxPermissions(this);
 
         RxLocation rxLocation = new RxLocation(this);
         rxLocation.setDefaultTimeout(15, TimeUnit.SECONDS);
 
         presenter = new MainPresenter(rxLocation);
+        RxPermissions rxPermissions = new RxPermissions(this);
+        rxPermissions
+                .request(Manifest.permission.ACCESS_FINE_LOCATION)
+                .subscribe(granted -> {
+                    if (granted) { // Always true pre-M
+                    } else {
+                        // Oups permission denied
+                    }
+                });
 
-//        rxPermissions
-//                .request(Manifest.permission.ACCESS_FINE_LOCATION)
-//                .subscribe(granted -> {
-//                    if (granted) { // Always true pre-M
-//                    } else {
-//                        // Oups permission denied
-//                    }
-//                });
+        // Within the activity
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        CarListFragment fragmentDemo = CarListFragment.newInstance(carsStr);
+        ft.replace(R.id.fragment, fragmentDemo);
+        ft.commit();
+
+        //Map fragment
 
 
-        //RECYCLER VIEW
-        carsRecyclerView = findViewById(R.id.carsRecyclerView);
-
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        carsRecyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        carsRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
-                DividerItemDecoration.VERTICAL));
-         carsRecyclerView.setLayoutManager(layoutManager);
-
-        // specify an adapter (see also next example)
-        mAdapter = new CarAdapter(concreteCars);
-        carsRecyclerView.setAdapter(mAdapter);
+//        //RECYCLER VIEW
+//        carsRecyclerView = findViewById(R.id.carsRecyclerView);
+//
+//        // use this setting to improve performance if you know that changes
+//        // in content do not change the layout size of the RecyclerView
+//        carsRecyclerView.setHasFixedSize(true);
+//
+//        // use a linear layout manager
+//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+//        carsRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
+//                DividerItemDecoration.VERTICAL));
+//         carsRecyclerView.setLayoutManager(layoutManager);
+//
+//        // specify an adapter (see also next example)
+//        mAdapter = new CarAdapter(concreteCars);
+//        carsRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
@@ -119,19 +129,16 @@ public class MainActivity extends AppCompatActivity implements MainView {
         for(Car car : concreteCars){
             car.setDistanceToCar(car.calculateDistance(location));
         }
-        //Sorting
 
-        Comparator<Car> cmp = (car1, car2) -> Float.compare(car1.getDistanceToCar(), car2.getDistanceToCar());
-        concreteCars.sort(cmp);
+        CarListFragment frag = (CarListFragment) getSupportFragmentManager().
+                findFragmentById(R.id.fragment);
 
-        mAdapter = new CarAdapter(concreteCars);
-        carsRecyclerView.setAdapter(mAdapter);
+        frag.updateList(concreteCars);
 
     }
 
     @Override
     public void onAddressUpdate(Address address) {
-        return;
     }
 
     @Override
@@ -167,9 +174,17 @@ public class MainActivity extends AppCompatActivity implements MainView {
             case R.id.filter:
                 Intent intent = new Intent(getApplicationContext(), FilterActivity.class);
                 startActivityForResult(intent, 0);
+                break;
+            case R.id.map:
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                CarMapFragment frag = CarMapFragment.newInstance(ParseJson.toJson(concreteCars));
+                ft.replace(R.id.fragment, frag);
+                ft.commit();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
+        return true;
     }
 
     @Override
@@ -193,8 +208,11 @@ public class MainActivity extends AppCompatActivity implements MainView {
         else {
             //UNFILTER
         }
-        mAdapter = new CarAdapter(concreteCars);
-        carsRecyclerView.setAdapter(mAdapter);
+
+        CarListFragment frag = (CarListFragment) getSupportFragmentManager().
+                findFragmentById(R.id.fragment);
+
+        frag.updateList(concreteCars);
     }
 }
 

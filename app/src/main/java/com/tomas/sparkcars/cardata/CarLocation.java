@@ -6,7 +6,7 @@ public class CarLocation {
     private Float longitude;
     private String address;
 
-    Float getLatitude() {
+    public Float getLatitude() {
         return latitude;
     }
 
@@ -14,7 +14,7 @@ public class CarLocation {
         this.latitude = latitude;
     }
 
-    Float getLongitude() {
+    public Float getLongitude() {
         return longitude;
     }
 

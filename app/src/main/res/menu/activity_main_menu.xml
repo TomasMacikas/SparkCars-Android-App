@@ -9,4 +9,11 @@
         android:icon="@drawable/filter_2x"
         android:title="@string/filter"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:icon="@drawable/places_ic_search"
+        android:title="@string/filter"
+        app:showAsAction="always" />
 </menu>
