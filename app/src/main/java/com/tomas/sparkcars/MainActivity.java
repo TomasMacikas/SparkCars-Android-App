@@ -3,6 +3,7 @@ package com.tomas.sparkcars;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Location;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,6 +27,8 @@ import com.tomas.sparkcars.helpers.MainView;
 import com.tomas.sparkcars.helpers.ParseJson;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
     private RecyclerView.LayoutManager layoutManager;
 
     List<Car> cars;
+    List<Car> concreteCars;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
         String carsStr = i.getStringExtra("cars");
 
         cars = ParseJson.fromJson(carsStr);
+
+        concreteCars = new ArrayList<>(cars);
         //Location calculations
         lastUpdate = findViewById(R.id.tv_last_update);
         locationText = findViewById(R.id.tv_current_location);
@@ -93,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         carsRecyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new CarAdapter(cars);
+        mAdapter = new CarAdapter(concreteCars);
         carsRecyclerView.setAdapter(mAdapter);
     }
 
@@ -114,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         lastUpdate.setText(DATE_FORMAT.format(new Date()));
         locationText.setText(location.getLatitude() + ", " + location.getLongitude());
 
-        for(Car car : cars){
+        for(Car car : concreteCars){
             car.setDistanceToCar(car.calculateDistance(location));
         }
         //Sorting
@@ -125,9 +131,9 @@ public class MainActivity extends AppCompatActivity implements MainView {
                         compareTo(Float.valueOf(car2.getDistanceToCar()));
             }
         };
-        cars.sort(cmp);
+        concreteCars.sort(cmp);
 
-        mAdapter = new CarAdapter(cars);
+        mAdapter = new CarAdapter(concreteCars);
         carsRecyclerView.setAdapter(mAdapter);
 
     }
@@ -169,11 +175,35 @@ public class MainActivity extends AppCompatActivity implements MainView {
         switch (item.getItemId()) {
             case R.id.filter:
                 Intent intent = new Intent(getApplicationContext(), FilterActivity.class);
-                startActivity(intent);
-
+                startActivityForResult(intent, 0);
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //concreteCars.clear();
+        concreteCars = new ArrayList<>(cars);
+
+        if(resultCode == 1){
+            int batteryPercentage =data.getIntExtra("battery", 50);
+            Log.i("Battery Limit", Integer.toString(batteryPercentage));
+            concreteCars.removeIf(p -> p.getBatteryPercentage() < batteryPercentage);
+        }
+        else if(resultCode == 2){
+            int batteryPercentage =data.getIntExtra("battery", 50);
+            Log.i("Battery Limit", Integer.toString(data.getIntExtra("battery", 50)));
+            String plate = data.getStringExtra("plate");
+            concreteCars.removeIf(p -> p.getBatteryPercentage() < batteryPercentage);
+            concreteCars.removeIf(p -> !(p.getPlateNumber().contains(plate)));
+        }
+        else {
+            //UNFILTER
+        }
+        mAdapter = new CarAdapter(concreteCars);
+        carsRecyclerView.setAdapter(mAdapter);
     }
 }
 
