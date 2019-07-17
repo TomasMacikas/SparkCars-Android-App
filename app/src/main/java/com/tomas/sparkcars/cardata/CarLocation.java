@@ -2,19 +2,31 @@ package com.tomas.sparkcars.cardata;
 
 public class CarLocation {
     int id;
-    Float latitude;
-    Float longitude;
-    String address;
+    private Float latitude;
+    private Float longitude;
+    private String address;
 
-    public Float getLatitude() {
+    Float getLatitude() {
         return latitude;
     }
 
-    public Float getLongitude() {
+    public void setLatitude(Float latitude) {
+        this.latitude = latitude;
+    }
+
+    Float getLongitude() {
         return longitude;
+    }
+
+    public void setLongitude(Float longitude) {
+        this.longitude = longitude;
     }
 
     public String getAddress() {
         return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

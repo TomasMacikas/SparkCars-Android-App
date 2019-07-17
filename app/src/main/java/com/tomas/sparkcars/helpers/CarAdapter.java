@@ -1,6 +1,6 @@
 package com.tomas.sparkcars.helpers;
 
-import android.support.v7.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +11,9 @@ import com.tomas.sparkcars.R;
 import com.tomas.sparkcars.cardata.Car;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
     private List<Car> mDataset;
@@ -28,12 +31,12 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
         private TextView address;
         public MyViewHolder(View v) {
             super(v);
-            title = (TextView) v.findViewById(R.id.title);
-            plateNumber = (TextView) v.findViewById(R.id.plateNumber);
-            distanceToCar = (TextView) v.findViewById(R.id.distanceToCar);
-            estimatedDistance = (TextView) v.findViewById(R.id.estimatedDistance);
-            carImageView = (ImageView) v.findViewById(R.id.carImageView);
-            address = (TextView) v.findViewById(R.id.address);
+            title = v.findViewById(R.id.title);
+            plateNumber = v.findViewById(R.id.plateNumber);
+            distanceToCar = v.findViewById(R.id.distanceToCar);
+            estimatedDistance = v.findViewById(R.id.estimatedDistance);
+            carImageView = v.findViewById(R.id.carImageView);
+            address = v.findViewById(R.id.address);
          }
     }
 
@@ -43,6 +46,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
     }
 
     // Create new views (invoked by the layout manager)
+    @NonNull
     @Override
     public CarAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                       int viewType) {
@@ -55,15 +59,15 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         Car car = mDataset.get(position);
 
         holder.title.setText(car.getModel().getTitle());
         holder.plateNumber.setText(car.getPlateNumber());
-        holder.distanceToCar.setText(Float.toString(car.getDistanceToCar()));
-        holder.estimatedDistance.setText("Distance left: " + Float.toString(car.getBatteryEstimatedDistance()) + "km");
+        holder.distanceToCar.setText(String.format("%.1f",car.getDistanceToCar()/1000)+ " km");
+        holder.estimatedDistance.setText("Distance left: " + String.format("%.0f",car.getBatteryEstimatedDistance()) + "km");
         holder.address.setText(car.getCarLocation().getAddress());
 
         holder.carImageView.setImageBitmap(car.getModel().getPhoto());

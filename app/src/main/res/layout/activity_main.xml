@@ -10,15 +10,13 @@
     <TextView
         style="@style/TextAppearance.AppCompat.Caption"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Last update" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/tv_last_update"
         style="@style/TextAppearance.AppCompat.Body1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Never" />
+        android:layout_height="wrap_content"/>
 
     <TextView
         style="@style/TextAppearance.AppCompat.Caption"
@@ -31,11 +29,10 @@
         android:id="@+id/tv_current_location"
         style="@style/TextAppearance.AppCompat.Body1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Not available" />
+        android:layout_height="wrap_content" />
 
 
-    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/carsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

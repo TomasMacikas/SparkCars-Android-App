@@ -3,13 +3,7 @@ package com.tomas.sparkcars;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Location;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +12,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.material.snackbar.Snackbar;
 import com.patloew.rxlocation.RxLocation;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tomas.sparkcars.cardata.Car;
@@ -28,26 +23,27 @@ import com.tomas.sparkcars.helpers.ParseJson;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class MainActivity extends AppCompatActivity implements MainView {
 
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance();
     private TextView lastUpdate;
     private TextView locationText;
-    private TextView addressText;
-
-    private RxLocation rxLocation;
 
     private MainPresenter presenter;
 
     private RecyclerView carsRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     List<Car> cars;
     List<Car> concreteCars;
@@ -68,9 +64,9 @@ public class MainActivity extends AppCompatActivity implements MainView {
         locationText = findViewById(R.id.tv_current_location);
 
         //Permissions
-        final RxPermissions rxPermissions = new RxPermissions(this);
+        //final RxPermissions rxPermissions = new RxPermissions(this);
 
-        rxLocation = new RxLocation(this);
+        RxLocation rxLocation = new RxLocation(this);
         rxLocation.setDefaultTimeout(15, TimeUnit.SECONDS);
 
         presenter = new MainPresenter(rxLocation);
@@ -86,17 +82,17 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
 
         //RECYCLER VIEW
-        carsRecyclerView = (RecyclerView) findViewById(R.id.carsRecyclerView);
+        carsRecyclerView = findViewById(R.id.carsRecyclerView);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         carsRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         carsRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
                 DividerItemDecoration.VERTICAL));
-        carsRecyclerView.setLayoutManager(layoutManager);
+         carsRecyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter (see also next example)
         mAdapter = new CarAdapter(concreteCars);
@@ -125,12 +121,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
         }
         //Sorting
 
-        Comparator<Car> cmp = new Comparator<Car>() {
-            public int compare(Car car1, Car car2) {
-                return Float.valueOf(car1.getDistanceToCar()).
-                        compareTo(Float.valueOf(car2.getDistanceToCar()));
-            }
-        };
+        Comparator<Car> cmp = (car1, car2) -> Float.compare(car1.getDistanceToCar(), car2.getDistanceToCar());
         concreteCars.sort(cmp);
 
         mAdapter = new CarAdapter(concreteCars);

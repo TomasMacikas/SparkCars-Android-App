@@ -4,13 +4,13 @@ import android.location.Location;
 import android.util.Log;
 
 public class Car {
-    String id;
-    String plateNumber;
-    CarLocation location;
-    float distanceToCar;
-    Model model;
-    int batteryPercentage;
-    float batteryEstimatedDistance;
+    private String id;
+    private String plateNumber;
+    private CarLocation location;
+    private float distanceToCar;
+    private Model model;
+    private int batteryPercentage;
+    private float batteryEstimatedDistance;
     //boolean isCharging;
 
     //etc
@@ -45,8 +45,8 @@ public class Car {
     }
     public float calculateDistance(Location current){
         Location carLoc = new Location("");
-        carLoc.setLatitude(location.latitude);
-        carLoc.setLongitude(location.longitude);
+        carLoc.setLatitude(location.getLatitude());
+        carLoc.setLongitude(location.getLongitude());
 
         float distanceInMeters = current.distanceTo(carLoc);
         Log.i("distancein", Float.toString(distanceInMeters));
