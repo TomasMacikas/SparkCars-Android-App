@@ -32,8 +32,8 @@
         android:padding="8dp"
         app:dsb_max="100"
         app:dsb_min="10"
-        app:dsb_thumbSize="24dp"
-        app:dsb_scrubberHeight="4dp"/>
+        app:dsb_scrubberHeight="4dp"
+        app:dsb_thumbSize="24dp" />
 
     <FrameLayout
         android:layout_width="match_parent"

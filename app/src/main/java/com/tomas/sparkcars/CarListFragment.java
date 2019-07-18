@@ -41,7 +41,7 @@ public class CarListFragment extends Fragment {
     public void updateList(List<Car> cars){
         concreteCars = cars;
         sortCars();
-        mAdapter = new CarAdapter(concreteCars);
+        mAdapter = new CarAdapter(concreteCars, getContext());
         carsRecyclerView.setAdapter(mAdapter);
     }
 
@@ -97,7 +97,7 @@ public class CarListFragment extends Fragment {
          carsRecyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new CarAdapter(concreteCars);
+        mAdapter = new CarAdapter(concreteCars, getContext());
         carsRecyclerView.setAdapter(mAdapter);
 
         return view;

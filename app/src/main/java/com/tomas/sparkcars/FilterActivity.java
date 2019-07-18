@@ -25,6 +25,7 @@ public class FilterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_filter);
         plateEditText = findViewById(R.id.plateEditText);
         remainingBattery = findViewById(R.id.seek_bar);
+        remainingBattery.setProgress(45);
     }
 
     public void filterClicked(View view){

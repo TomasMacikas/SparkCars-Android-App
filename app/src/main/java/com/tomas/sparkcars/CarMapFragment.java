@@ -12,10 +12,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.tomas.sparkcars.cardata.Car;
-import com.tomas.sparkcars.helpers.CarAdapter;
 import com.tomas.sparkcars.helpers.ParseJson;
 
 import java.util.ArrayList;
@@ -24,9 +24,6 @@ import java.util.List;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class CarMapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -34,9 +31,7 @@ public class CarMapFragment extends Fragment implements OnMapReadyCallback {
 
     List<Car> concreteCars;
 
-    private RecyclerView carsRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-
+    GoogleMap map;
 
     public void setConcreteCars(List<Car> cars){
         concreteCars = cars;
@@ -44,23 +39,36 @@ public class CarMapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
+        map = googleMap;
         for(Car car : concreteCars){
             LatLng loc = new LatLng(car.getCarLocation().getLatitude(),
                     car.getCarLocation().getLongitude());
-            googleMap.addMarker(new MarkerOptions().position(loc)
-                    .title(car.getPlateNumber()));
+            MarkerOptions marker = new MarkerOptions().position(loc).
+                    title(car.getPlateNumber()).
+                    snippet(car.getBatteryEstimatedDistance() + " km").
+                    icon(BitmapDescriptorFactory.fromResource(R.drawable.car_logo));
+
+            googleMap.addMarker(marker);
         }
         LatLng loc = new LatLng(54.67, 25.270);
-        float zoomLevel = 10.0f;
+        float zoomLevel = 11.0f;
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, zoomLevel));
     }
 
-    public void updateList(List<Car> cars){
+    public void updateMap(List<Car> cars){
+        map.clear();
         concreteCars = cars;
         sortCars();
-        mAdapter = new CarAdapter(concreteCars);
-        carsRecyclerView.setAdapter(mAdapter);
+        for(Car car : concreteCars){
+            LatLng loc = new LatLng(car.getCarLocation().getLatitude(),
+                    car.getCarLocation().getLongitude());
+            MarkerOptions marker = new MarkerOptions().position(loc).
+                    title(car.getPlateNumber()).
+                    snippet(car.getBatteryEstimatedDistance() + " km").
+                    icon(BitmapDescriptorFactory.fromResource(R.drawable.car_logo));
+
+            map.addMarker(marker);
+        }
     }
 
     public void sortCars(){
@@ -71,8 +79,6 @@ public class CarMapFragment extends Fragment implements OnMapReadyCallback {
     public CarMapFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
     public static CarMapFragment newInstance(String cars) {
         CarMapFragment fragment = new CarMapFragment();
         Bundle args = new Bundle();
@@ -98,7 +104,7 @@ public class CarMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_maps, container, false);
+        View view = inflater.inflate(R.layout.fragment_maps, container, false);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);

@@ -1,12 +1,16 @@
 package com.tomas.sparkcars.helpers;
 
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.tomas.sparkcars.R;
 import com.tomas.sparkcars.cardata.Car;
 
@@ -17,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
     private List<Car> mDataset;
+    private Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -29,6 +34,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
         private TextView estimatedDistance;
         private ImageView carImageView;
         private TextView address;
+
         public MyViewHolder(View v) {
             super(v);
             title = v.findViewById(R.id.title);
@@ -38,10 +44,15 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
             carImageView = v.findViewById(R.id.carImageView);
             address = v.findViewById(R.id.address);
          }
+
+        public ImageView getCarImageView() {
+            return carImageView;
+        }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CarAdapter(List<Car> myDataset) {
+    public CarAdapter(List<Car> myDataset, Context context) {
+        this.context = context;
         mDataset = myDataset;
     }
 
@@ -66,11 +77,15 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
 
         holder.title.setText(car.getModel().getTitle());
         holder.plateNumber.setText(car.getPlateNumber());
-        holder.distanceToCar.setText(String.format("%.1f",car.getDistanceToCar()/1000)+ " km");
-        holder.estimatedDistance.setText("Distance left: " + String.format("%.0f",car.getBatteryEstimatedDistance()) + "km");
+        holder.distanceToCar.setText(String.format("%.1f",car.getDistanceToCar()/1000)+ " km away");
+        holder.estimatedDistance.setText("Estimated distance: " + String.format("%.0f",car.getBatteryEstimatedDistance()) + " km");
         holder.address.setText(car.getCarLocation().getAddress());
 
-        holder.carImageView.setImageBitmap(car.getModel().getPhoto());
+        Glide.with(this.context)
+                .load(car.getModel().getPhotoUrl()).
+                diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.getCarImageView());
+
+        //holder.carImageView.setImageBitmap(car.getModel().getPhoto());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

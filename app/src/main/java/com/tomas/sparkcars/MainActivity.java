@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -17,96 +18,72 @@ import com.google.android.material.snackbar.Snackbar;
 import com.patloew.rxlocation.RxLocation;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.tomas.sparkcars.cardata.Car;
-import com.tomas.sparkcars.helpers.CarAdapter;
 import com.tomas.sparkcars.helpers.MainPresenter;
 import com.tomas.sparkcars.helpers.MainView;
 import com.tomas.sparkcars.helpers.ParseJson;
-
+import com.tomas.sparkcars.helpers.ScreenSlidePagerAdapter;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 public class MainActivity extends AppCompatActivity implements MainView {
 
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance();
     private TextView lastUpdate;
     private TextView locationText;
 
     private MainPresenter presenter;
 
-    private RecyclerView carsRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-
     List<Car> cars;
-    List<Car> concreteCars;
+    List<Car> concreteCars; //Cars after filtering, for fragments
+
+    private ViewPager mPager;
+    private PagerAdapter pagerAdapter;
+
+    CarListFragment carListFragment;
+    CarMapFragment carMapFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Getting cars from json
         Intent i = getIntent();
         String carsStr = i.getStringExtra("cars");
-
         cars = ParseJson.fromJson(carsStr);
 
         concreteCars = new ArrayList<>(cars);
-        //Location calculations
-        lastUpdate = findViewById(R.id.tv_last_update);
-        locationText = findViewById(R.id.tv_current_location);
 
+        //Creating Fragments
+        carMapFragment = CarMapFragment.newInstance(carsStr);
+        carListFragment = CarListFragment.newInstance(carsStr);
+
+        //Creating and setting up Pager
+        mPager = findViewById(R.id.pager);
+        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        ((ScreenSlidePagerAdapter) pagerAdapter).setCarListFragment(carListFragment);
+        ((ScreenSlidePagerAdapter) pagerAdapter).setCarMapFragment(carMapFragment);
+        mPager.setAdapter(pagerAdapter);
         //Permissions
-
-        RxLocation rxLocation = new RxLocation(this);
-        rxLocation.setDefaultTimeout(15, TimeUnit.SECONDS);
-
-        presenter = new MainPresenter(rxLocation);
         RxPermissions rxPermissions = new RxPermissions(this);
         rxPermissions
                 .request(Manifest.permission.ACCESS_FINE_LOCATION)
                 .subscribe(granted -> {
-                    if (granted) { // Always true pre-M
+                    if (granted) {
+                        RxLocation rxLocation = new RxLocation(this);
+                        rxLocation.setDefaultTimeout(15, TimeUnit.SECONDS);
+                        presenter = new MainPresenter(rxLocation);
                     } else {
-                        // Oups permission denied
+                        Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show();
+                        finish();
                     }
                 });
-
-        // Within the activity
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        CarListFragment fragmentDemo = CarListFragment.newInstance(carsStr);
-        ft.replace(R.id.fragment, fragmentDemo);
-        ft.commit();
-
-        //Map fragment
-
-
-//        //RECYCLER VIEW
-//        carsRecyclerView = findViewById(R.id.carsRecyclerView);
-//
-//        // use this setting to improve performance if you know that changes
-//        // in content do not change the layout size of the RecyclerView
-//        carsRecyclerView.setHasFixedSize(true);
-//
-//        // use a linear layout manager
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-//        carsRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
-//                DividerItemDecoration.VERTICAL));
-//         carsRecyclerView.setLayoutManager(layoutManager);
-//
-//        // specify an adapter (see also next example)
-//        mAdapter = new CarAdapter(concreteCars);
-//        carsRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
@@ -123,17 +100,12 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     public void onLocationUpdate(Location location) {
         Log.i("location", location.getLatitude() + ", " + location.getLongitude());
-        lastUpdate.setText(DATE_FORMAT.format(new Date()));
-        locationText.setText(location.getLatitude() + ", " + location.getLongitude());
 
         for(Car car : concreteCars){
             car.setDistanceToCar(car.calculateDistance(location));
         }
 
-        CarListFragment frag = (CarListFragment) getSupportFragmentManager().
-                findFragmentById(R.id.fragment);
-
-        frag.updateList(concreteCars);
+        carListFragment.updateList(concreteCars);
 
     }
 
@@ -175,11 +147,12 @@ public class MainActivity extends AppCompatActivity implements MainView {
                 Intent intent = new Intent(getApplicationContext(), FilterActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-            case R.id.map:
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                CarMapFragment frag = CarMapFragment.newInstance(ParseJson.toJson(concreteCars));
-                ft.replace(R.id.fragment, frag);
-                ft.commit();
+            case R.id.changePerspective:
+                if(mPager.getCurrentItem() == 0){
+                    mPager.setCurrentItem(1);
+                }else{
+                    mPager.setCurrentItem(0);
+                }
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -190,7 +163,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //concreteCars.clear();
         concreteCars = new ArrayList<>(cars);
 
         if(resultCode == 1){
@@ -208,11 +180,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
         else {
             //UNFILTER
         }
-
-        CarListFragment frag = (CarListFragment) getSupportFragmentManager().
-                findFragmentById(R.id.fragment);
-
-        frag.updateList(concreteCars);
+        carListFragment.updateList(concreteCars);
+        carMapFragment.updateMap(concreteCars);
     }
 }
 
