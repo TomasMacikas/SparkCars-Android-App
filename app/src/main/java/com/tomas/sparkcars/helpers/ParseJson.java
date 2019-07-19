@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.tomas.sparkcars.cardata.Car;
+import com.tomas.sparkcars.models.Car;
 
 import java.io.BufferedReader;
 import java.io.IOException;

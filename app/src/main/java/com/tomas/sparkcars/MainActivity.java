@@ -17,17 +17,19 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.snackbar.Snackbar;
 import com.patloew.rxlocation.RxLocation;
 import com.tbruyelle.rxpermissions2.RxPermissions;
-import com.tomas.sparkcars.cardata.Car;
+import com.tomas.sparkcars.models.Car;
 import com.tomas.sparkcars.helpers.MainPresenter;
 import com.tomas.sparkcars.helpers.MainView;
-import com.tomas.sparkcars.helpers.ParseJson;
-import com.tomas.sparkcars.helpers.ScreenSlidePagerAdapter;
-import java.text.DateFormat;
-import java.util.ArrayList;
+import com.tomas.sparkcars.adapters.ScreenSlidePagerAdapter;
+import com.tomas.sparkcars.models.Filter;
+import com.tomas.sparkcars.viewmodels.MainActivityViewModel;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -38,9 +40,6 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     private MainPresenter presenter;
 
-    List<Car> cars;
-    List<Car> concreteCars; //Cars after filtering, for fragments
-
     private ViewPager mPager;
     private PagerAdapter pagerAdapter;
 
@@ -48,28 +47,31 @@ public class MainActivity extends AppCompatActivity implements MainView {
     CarMapFragment carMapFragment;
 
 
+    private MainActivityViewModel mainActivityViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Getting cars from json
-        Intent i = getIntent();
-        String carsStr = i.getStringExtra("cars");
-        cars = ParseJson.fromJson(carsStr);
+        mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
 
-        concreteCars = new ArrayList<>(cars);
+        mainActivityViewModel.init();
 
-        //Creating Fragments
-        carMapFragment = CarMapFragment.newInstance(carsStr);
-        carListFragment = CarListFragment.newInstance(carsStr);
+        carMapFragment = new CarMapFragment();
+        carListFragment = new CarListFragment();
 
+        mainActivityViewModel.getCars().observe(this, new Observer<List<Car>>() {
+            @Override
+            public void onChanged(List<Car> cars) {
+                //carListFragment.updateList();
+                //carMapFragment.updateMap();
+            }
+        });
         //Creating and setting up Pager
         mPager = findViewById(R.id.pager);
-        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
-        ((ScreenSlidePagerAdapter) pagerAdapter).setCarListFragment(carListFragment);
-        ((ScreenSlidePagerAdapter) pagerAdapter).setCarMapFragment(carMapFragment);
-        mPager.setAdapter(pagerAdapter);
+        initPager();
+
         //Permissions
         RxPermissions rxPermissions = new RxPermissions(this);
         rxPermissions
@@ -84,6 +86,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
                         finish();
                     }
                 });
+    }
+
+    public void initPager(){
+        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        ((ScreenSlidePagerAdapter) pagerAdapter).setCarListFragment(carListFragment);
+        ((ScreenSlidePagerAdapter) pagerAdapter).setCarMapFragment(carMapFragment);
+        mPager.setAdapter(pagerAdapter);
     }
 
     @Override
@@ -101,12 +110,10 @@ public class MainActivity extends AppCompatActivity implements MainView {
     public void onLocationUpdate(Location location) {
         Log.i("location", location.getLatitude() + ", " + location.getLongitude());
 
-        for(Car car : concreteCars){
+        for(Car car : mainActivityViewModel.getCars().getValue()){
             car.setDistanceToCar(car.calculateDistance(location));
         }
-
-        carListFragment.updateList(concreteCars);
-
+        carListFragment.updateList();
     }
 
     @Override
@@ -163,25 +170,29 @@ public class MainActivity extends AppCompatActivity implements MainView {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        concreteCars = new ArrayList<>(cars);
 
+        //Update Cars from API
+        mainActivityViewModel.getCarsFromRepository();
+
+        Filter filter = new Filter();
         if(resultCode == 1){
             int batteryPercentage =data.getIntExtra("battery", 50);
-            Log.i("Battery Limit", Integer.toString(batteryPercentage));
-            concreteCars.removeIf(p -> p.getBatteryPercentage() < batteryPercentage);
+            filter.setBatteryPercentage(batteryPercentage);
+            filter.setPlateNumber("");
+            mainActivityViewModel.filterCars(filter);
         }
         else if(resultCode == 2){
             int batteryPercentage =data.getIntExtra("battery", 50);
-            Log.i("Battery Limit", Integer.toString(data.getIntExtra("battery", 50)));
             String plate = data.getStringExtra("plate");
-            concreteCars.removeIf(p -> p.getBatteryPercentage() < batteryPercentage);
-            concreteCars.removeIf(p -> !(p.getPlateNumber().contains(plate)));
+            filter.setBatteryPercentage(batteryPercentage);
+            filter.setPlateNumber(plate);
+            mainActivityViewModel.filterCars(filter);
         }
         else {
-            //UNFILTER
+
         }
-        carListFragment.updateList(concreteCars);
-        carMapFragment.updateMap(concreteCars);
+        carListFragment.updateList();
+        carMapFragment.updateMap();
     }
 }
 

@@ -1,4 +1,4 @@
-package com.tomas.sparkcars.helpers;
+package com.tomas.sparkcars.adapters;
 
 import com.tomas.sparkcars.CarListFragment;
 import com.tomas.sparkcars.CarMapFragment;

@@ -1,17 +1,14 @@
 package com.tomas.sparkcars;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.tomas.sparkcars.cardata.Car;
-import com.tomas.sparkcars.helpers.DownloadImageTask;
+import com.tomas.sparkcars.models.Car;
 import com.tomas.sparkcars.helpers.ParseJson;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import androidx.appcompat.app.AppCompatActivity;
 

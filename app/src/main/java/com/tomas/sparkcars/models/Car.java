@@ -1,4 +1,4 @@
-package com.tomas.sparkcars.cardata;
+package com.tomas.sparkcars.models;
 
 import android.location.Location;
 import android.util.Log;

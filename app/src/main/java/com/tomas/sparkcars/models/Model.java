@@ -1,4 +1,4 @@
-package com.tomas.sparkcars.cardata;
+package com.tomas.sparkcars.models;
 
 public class Model {
     int id;

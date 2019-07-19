@@ -1,4 +1,4 @@
-package com.tomas.sparkcars.helpers;
+package com.tomas.sparkcars.adapters;
 
 
 import android.content.Context;
@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.tomas.sparkcars.R;
-import com.tomas.sparkcars.cardata.Car;
+import com.tomas.sparkcars.models.Car;
 
 import java.util.List;
 

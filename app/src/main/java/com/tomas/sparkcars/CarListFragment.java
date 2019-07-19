@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,11 +16,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.tbruyelle.rxpermissions2.RxPermissions;
-import com.tomas.sparkcars.cardata.Car;
-import com.tomas.sparkcars.helpers.CarAdapter;
-import com.tomas.sparkcars.helpers.MainView;
+import com.tomas.sparkcars.models.Car;
+import com.tomas.sparkcars.adapters.CarAdapter;
 import com.tomas.sparkcars.helpers.ParseJson;
+import com.tomas.sparkcars.viewmodels.MainActivityViewModel;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,23 +29,24 @@ public class CarListFragment extends Fragment {
 
     FragmentActivity listener;
 
-    List<Car> concreteCars;
-
     private RecyclerView carsRecyclerView;
     private RecyclerView.Adapter mAdapter;
 
+    MainActivityViewModel mainActivityViewModel;
 
 
-    public void updateList(List<Car> cars){
-        concreteCars = cars;
-        sortCars();
-        mAdapter = new CarAdapter(concreteCars, getContext());
-        carsRecyclerView.setAdapter(mAdapter);
+    public void updateList(){
+        if(getActivity() != null){
+            mainActivityViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
+            sortCars();
+            mAdapter = new CarAdapter(mainActivityViewModel.getCars().getValue(), getContext());
+            carsRecyclerView.setAdapter(mAdapter);
+        }
     }
 
     public void sortCars(){
         Comparator<Car> cmp = (car1, car2) -> Float.compare(car1.getDistanceToCar(), car2.getDistanceToCar());
-        concreteCars.sort(cmp);
+        mainActivityViewModel.getCars().getValue().sort(cmp);
     }
 
     public CarListFragment() {
@@ -66,16 +65,17 @@ public class CarListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mainActivityViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
 
-        String cars = "";
-        if(getArguments()!=null){
-            cars = getArguments().getString("cars", "");
-            concreteCars = ParseJson.fromJson(cars);
-            Log.i("printcars", cars);
-        }
-        else{
-            concreteCars = new ArrayList<>();
-        }
+//        String cars = "";
+//        if(getArguments()!=null){
+//            cars = getArguments().getString("cars", "");
+//            concreteCars = ParseJson.fromJson(cars);
+//            Log.i("printcars", cars);
+//        }
+//        else{
+//            concreteCars = new ArrayList<>();
+//        }
     }
 
     @Override
@@ -97,7 +97,7 @@ public class CarListFragment extends Fragment {
          carsRecyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new CarAdapter(concreteCars, getContext());
+        mAdapter = new CarAdapter(mainActivityViewModel.getCars().getValue(), getContext());
         carsRecyclerView.setAdapter(mAdapter);
 
         return view;
