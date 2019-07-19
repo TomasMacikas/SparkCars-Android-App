@@ -11,19 +11,15 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.tomas.sparkcars.models.Car;
 import com.tomas.sparkcars.adapters.CarAdapter;
-import com.tomas.sparkcars.helpers.ParseJson;
 import com.tomas.sparkcars.viewmodels.MainActivityViewModel;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 public class CarListFragment extends Fragment {
 
@@ -52,30 +48,10 @@ public class CarListFragment extends Fragment {
     public CarListFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static CarListFragment newInstance(String cars) {
-        CarListFragment fragment = new CarListFragment();
-        Bundle args = new Bundle();
-        args.putString("cars", cars);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainActivityViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
-
-//        String cars = "";
-//        if(getArguments()!=null){
-//            cars = getArguments().getString("cars", "");
-//            concreteCars = ParseJson.fromJson(cars);
-//            Log.i("printcars", cars);
-//        }
-//        else{
-//            concreteCars = new ArrayList<>();
-//        }
     }
 
     @Override
@@ -86,23 +62,18 @@ public class CarListFragment extends Fragment {
 //        RECYCLER VIEW
         carsRecyclerView = view.findViewById(R.id.carsRecyclerView);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         carsRecyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         carsRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(),
                 DividerItemDecoration.VERTICAL));
-         carsRecyclerView.setLayoutManager(layoutManager);
+        carsRecyclerView.setLayoutManager(layoutManager);
 
-        // specify an adapter (see also next example)
         mAdapter = new CarAdapter(mainActivityViewModel.getCars().getValue(), getContext());
         carsRecyclerView.setAdapter(mAdapter);
 
         return view;
     }
-
 
     @Override
     public void onAttach(Context context) {

@@ -56,7 +56,6 @@ public class CarMapFragment extends Fragment implements OnMapReadyCallback {
     public void updateMap(){
         if(getActivity()!=null) {
             map.clear();
-            //sortCars()
             mainActivityViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
             for (Car car : mainActivityViewModel.getCars().getValue()) {
                 LatLng loc = new LatLng(car.getCarLocation().getLatitude(),
@@ -71,19 +70,11 @@ public class CarMapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    public void sortCars(){
-        Comparator<Car> cmp = (car1, car2) -> Float.compare(car1.getDistanceToCar(), car2.getDistanceToCar());
-        //concreteCars.sort(cmp);
-    }
-
     public CarMapFragment() {
     }
 
     public static CarMapFragment newInstance() {
         CarMapFragment fragment = new CarMapFragment();
-//        Bundle args = new Bundle();
-//        args.putString("cars", cars);
-//        fragment.setArguments(args);
         return fragment;
     }
 
@@ -91,15 +82,6 @@ public class CarMapFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainActivityViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
-//        String cars = "";
-//        if(getArguments()!=null){
-//            cars = getArguments().getString("cars", "");
-//            concreteCars = ParseJson.fromJson(cars);
-//            Log.i("printcars", cars);
-//        }
-//        else{
-//            concreteCars = new ArrayList<>();
-//        }
     }
 
     @Override

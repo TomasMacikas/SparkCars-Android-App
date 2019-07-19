@@ -33,7 +33,6 @@ public class CarsRepository {
         try {
             dataset = (ArrayList<Car>) ParseJson.fromJson(new ParseJson().
                     execute("https://development.espark.lt/api/mobile/public/availablecars").get());
-            Log.i("CarDataset", dataset.toString());
             data.setValue(dataset);
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();

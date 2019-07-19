@@ -24,7 +24,6 @@ import com.tomas.sparkcars.adapters.ScreenSlidePagerAdapter;
 import com.tomas.sparkcars.models.Filter;
 import com.tomas.sparkcars.viewmodels.MainActivityViewModel;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,13 +60,12 @@ public class MainActivity extends AppCompatActivity implements MainView {
         carMapFragment = new CarMapFragment();
         carListFragment = new CarListFragment();
 
-        mainActivityViewModel.getCars().observe(this, new Observer<List<Car>>() {
-            @Override
-            public void onChanged(List<Car> cars) {
-                //carListFragment.updateList();
-                //carMapFragment.updateMap();
-            }
+        mainActivityViewModel.getCars().observe(this, cars -> {
+            //Update not scheduled, updates on filtering, so not needed
+            //carListFragment.updateList();
+            //carMapFragment.updateMap();
         });
+
         //Creating and setting up Pager
         mPager = findViewById(R.id.pager);
         initPager();

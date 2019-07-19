@@ -23,7 +23,6 @@ public class MainActivityViewModel extends ViewModel {
         }
         carsRepository = CarsRepository.getInstance();
         cars = carsRepository.getCars();
-        Log.i("Cars", cars.getValue().toString());
     }
 
     public LiveData<List<Car>> getCars(){

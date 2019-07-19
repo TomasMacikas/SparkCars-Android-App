@@ -85,10 +85,8 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.MyViewHolder> {
                 .load(car.getModel().getPhotoUrl()).
                 diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.getCarImageView());
 
-        //holder.carImageView.setImageBitmap(car.getModel().getPhoto());
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return mDataset.size();

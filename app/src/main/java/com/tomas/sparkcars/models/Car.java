@@ -49,7 +49,6 @@ public class Car {
         carLoc.setLongitude(location.getLongitude());
 
         float distanceInMeters = current.distanceTo(carLoc);
-        Log.i("distancein", Float.toString(distanceInMeters));
         return distanceInMeters;
     }
 }

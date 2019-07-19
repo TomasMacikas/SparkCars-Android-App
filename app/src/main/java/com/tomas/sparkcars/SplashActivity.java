@@ -28,15 +28,6 @@ public class SplashActivity extends AppCompatActivity {
                     progressBar.setVisibility(View.VISIBLE);
                     //Loading here
                     cars = ParseJson.fromJson(new ParseJson().execute("https://development.espark.lt/api/mobile/public/availablecars").get());
-//                    for (Car car : cars){
-//                        Bitmap img;
-//                        try {
-//                            img = new DownloadImageTask().execute(car.getModel().getPhotoUrl()).get();
-//                            car.getModel().setPhoto(img);
-//                        } catch (ExecutionException | InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {

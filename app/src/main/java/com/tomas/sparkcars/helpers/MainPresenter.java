@@ -12,6 +12,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
+//Class used for location observable
 public class MainPresenter {
 
     private final CompositeDisposable disposable = new CompositeDisposable();
